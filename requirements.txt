@@ -4,4 +4,4 @@ mlxtend
 streamlit==1.19.0
 streamlit_authenticator==0.2.1
 pathlib
-pickle
+pickle5
