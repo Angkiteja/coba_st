@@ -67,26 +67,8 @@ if authentication_status:
     #@st.cache_data(show_spinner="Mengambil data...")
     #preprocessing
     #load dataset csv
-    # def get_data_parque():
-    #     df = pd.read_parquet("data_clean.parque", engine='auto')
-    #     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
-    #     df["hour"] = df['InvoiceDate'].dt.hour
-    #     df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
-    #     df['hour'] = df['hour'].replace([9,10,11], "9 - 11")
-    #     df['hour'] = df['hour'].replace([12,13,14], "12 - 14")
-    #     df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
-    #     df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
-    #     return df
-    # df = get_data_parque()
-
-    
-
-        #load dataset sql
-   #@st.cache_data
-    def get_data_sql():
-        mysqldb_conn = mc.connect(host="localhost", user="root", password="123", database="db_mba")
-        sql_query = pd.read_sql_query("SELECT * FROM datacustomer_parque", mysqldb_conn)
-        df = pd.DataFrame(sql_query)
+    def get_data_parque():
+        df = pd.read_parquet("data_clean.parque", engine='auto')
         df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
         df["hour"] = df['InvoiceDate'].dt.hour
         df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
@@ -95,7 +77,25 @@ if authentication_status:
         df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
         df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
         return df
-    df = get_data_sql()
+    df = get_data_parque()
+
+    
+
+        #load dataset sql
+   #@st.cache_data
+    # def get_data_sql():
+    #     mysqldb_conn = mc.connect(host="localhost", user="root", password="123", database="db_mba")
+    #     sql_query = pd.read_sql_query("SELECT * FROM datacustomer_parque", mysqldb_conn)
+    #     df = pd.DataFrame(sql_query)
+    #     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
+    #     df["hour"] = df['InvoiceDate'].dt.hour
+    #     df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
+    #     df['hour'] = df['hour'].replace([9,10,11], "9 - 11")
+    #     df['hour'] = df['hour'].replace([12,13,14], "12 - 14")
+    #     df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
+    #     df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
+    #     return df
+    # df = get_data_sql()
 
     with st.sidebar:
         # st.header("ini header")
