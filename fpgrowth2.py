@@ -2,31 +2,25 @@
 from re import L
 from altair.vegalite.v5.schema.channels import Column
 #from mlxtend import frequent_patterns
-from mysql.connector.fabric import connect
-from pandas.core import algorithms
-from pandas.core.indexes.base import Index
-from sqlalchemy import create_engine
+#from mysql.connector.fabric import connect
+#from pandas.core import algorithms
+#from pandas.core.indexes.base import Index
+#from sqlalchemy import create_engine
 import streamlit as st
 import pandas as pd
-import numpy as np
+#import numpy as np
 from mlxtend.frequent_patterns import association_rules, apriori, fpgrowth
 from mlxtend.preprocessing import TransactionEncoder
-import seaborn as sns
-import matplotlib.pyplot as plt
+#import seaborn as sns
+#import matplotlib.pyplot as plt
 import streamlit_authenticator as stauth
 import mysql.connector as mc
-import sqlite3
+#import sqlite3
 import pickle 
 from pathlib import Path
-import datetime
+#import datetime
 from time import process_time
 
-from pandas.api.types import (
-    is_categorical_dtype,
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-    is_object_dtype,
-)
 
 st.set_page_config(page_title="Market Basket Analysis", page_icon="🧺️", layout="wide")
 
