@@ -82,7 +82,7 @@ if authentication_status:
     
 
         #load dataset sql
-    @st.cache_data
+   #@st.cache_data
     def get_data_sql():
         mysqldb_conn = mc.connect(host="localhost", user="root", password="123", database="db_mba")
         sql_query = pd.read_sql_query("SELECT * FROM datacustomer_parque", mysqldb_conn)
