@@ -1,4 +1,4 @@
-mysql-connector-python==8.0.32
+mysql-connector-python
 pandas==1.5.2
 mlxtend
 streamlit==1.19.0
