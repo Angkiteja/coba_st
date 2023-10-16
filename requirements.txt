@@ -3,6 +3,5 @@ pandas==1.5.2
 mlxtend
 streamlit==1.19.0
 streamlit_authenticator==0.2.1
-time
 pathlib
 pickle
