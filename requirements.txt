@@ -1,7 +1,7 @@
 mysql-connector-python
 pandas==1.5.2
 mlxtend
-streamlit==1.19.0
+streamlit
 streamlit_authenticator==0.2.1
 pathlib
 pickle5
