@@ -6,3 +6,4 @@ streamlit_authenticator==0.2.1
 pathlib
 pickle5
 deta==1.1.0
+python-dotenv==1.0.0
