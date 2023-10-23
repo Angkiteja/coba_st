@@ -331,7 +331,7 @@ if authentication_status:
             st.markdown("---")
 
             st.header("Saved Data")
-            selection = dataframe_with_selections(hd)
+            st.dataframe(dataframe_with_selections(hd), use_container_width=True)
             # st.write("Your selection:")
             # st.write(selection)
         
