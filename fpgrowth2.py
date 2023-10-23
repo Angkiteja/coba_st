@@ -337,7 +337,7 @@ if authentication_status:
         
         else:
             st.warning("Masukkan data lengkap")
-        st.write(get_all_history())
+        #st.write(get_all_history())
         
         
 
