@@ -342,7 +342,7 @@ if authentication_status:
         
 
 
-        --- HIDE STREAMLIT STYLE ---
+        # --- HIDE STREAMLIT STYLE ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
