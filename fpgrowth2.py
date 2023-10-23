@@ -1,29 +1,21 @@
-#from backup_fpgrowth import get_data
-#from re import L
-#from altair.vegalite.v5.schema.channels import Column
-#from mlxtend import frequent_patterns
-#from mysql.connector.fabric import connect
-#from pandas.core import algorithms
-#from pandas.core.indexes.base import Index
-#from sqlalchemy import create_engine
 import streamlit as st
 import pandas as pd
-#import numpy as np
 from mlxtend.frequent_patterns import association_rules, apriori, fpgrowth
 from mlxtend.preprocessing import TransactionEncoder
-#import seaborn as sns
-#import matplotlib.pyplot as plt
 import streamlit_authenticator as stauth
 import mysql.connector as mc
-import sqlite3
 import pickle 
 from pathlib import Path
-#import datetime
 from time import process_time
+import database as db
 
 
 st.set_page_config(page_title="Market Basket Analysis", page_icon="🧺️", layout="wide")
 
+# Connect to Deta Base with your Data Key
+#deta = Deta(st.secrets["data_key"])
+#create/connect database
+#db = deta.Base("db_mba")
 
 # ----USER-AUTH
 names = ["Admin 1", "Admin 2"]
@@ -64,29 +56,11 @@ if authentication_status:
     #print(dfsql)
     authenticator.logout("Logout", "sidebar")
     
-    #@st.cache_data(show_spinner="Mengambil data...")
-    #preprocessing
-    #load dataset csv
-    # def get_data_parque():
-    #     df = pd.read_parquet("data_clean.parque", engine='auto')
-    #     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
-    #     df["hour"] = df['InvoiceDate'].dt.hour
-    #     df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
-    #     df['hour'] = df['hour'].replace([9,10,11], "9 - 11")
-    #     df['hour'] = df['hour'].replace([12,13,14], "12 - 14")
-    #     df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
-    #     df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
-    #     return df
-    # df = get_data_parque()
-
-    
-
-        #load dataset sql
-   # @st.cache_data
-    def get_data_sql():
-        mysqldb_conn = mc.connect(host="localhost", user="root", password="123", database="db_mba")
-        sql_query = pd.read_sql_query("SELECT * FROM datacustomer_parque", mysqldb_conn)
-        df = pd.DataFrame(sql_query)
+    @st.cache_data(show_spinner="Mengambil data...")
+    preprocessing
+    load dataset csv
+    def get_data_parque():
+        df = pd.read_parquet("data_clean.parque", engine='auto')
         df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
         df["hour"] = df['InvoiceDate'].dt.hour
         df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
@@ -95,7 +69,40 @@ if authentication_status:
         df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
         df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
         return df
-    df = get_data_sql()
+    df = get_data_parque()
+
+    
+    # --- DATABASE INTERFACE ---
+    def get_all_history():
+        items = db.fetch_all_history()
+        history = [item for item in items]
+        return history
+    def get_key():
+        keys = db.fetch_all_history()
+        key = [item["key"] for item in keys]
+        return key
+
+    def get_selected_keys(hd):
+    # Dapatkan kunci yang dicentang dari dataframe
+        selected_rows = hd[hd.Select]
+        selected_keys = selected_rows["key"]  # Ubah "key" ke kolom yang sesuai dalam dataframe Anda
+        return selected_keys
+
+        #load dataset sql
+    # @st.cache_data
+    # def get_data_sql():
+    #     mysqldb_conn = mc.connect(host="localhost", user="root", password="123", database="db_mba")
+    #     sql_query = pd.read_sql_query("SELECT * FROM datacustomer_parque", mysqldb_conn)
+    #     df = pd.DataFrame(sql_query)
+    #     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
+    #     df["hour"] = df['InvoiceDate'].dt.hour
+    #     df['hour'] = df['hour'].replace([6,7,8], "6 - 8")
+    #     df['hour'] = df['hour'].replace([9,10,11], "9 - 11")
+    #     df['hour'] = df['hour'].replace([12,13,14], "12 - 14")
+    #     df['hour'] = df['hour'].replace([15,16,17], "15 - 17")
+    #     df['hour'] = df['hour'].replace([18,19,20], "18 - 20")
+    #     return df
+    # df = get_data_sql()
 
     with st.sidebar:
         # st.header("ini header")
@@ -115,23 +122,28 @@ if authentication_status:
             min_date = df['InvoiceDate'].min()
             max_date = df['InvoiceDate'].max()
             df_selection_by_datepicker = pd.DataFrame()
+            
 
-            description = st.selectbox("Item",
+            description = st.selectbox("Item name",
                 df["Description"].unique()
             )
             df_selection= df.query(
                 "Description == @description"
             )
             user_date_input = st.date_input(
-                f"Values for {'InvoiceDate'}",
+                "Select the date",
                 value=(df['InvoiceDate'].min(),
                 df['InvoiceDate'].min()), min_value = min_date, max_value = max_date
             )
+            
             if len(user_date_input) == 2:
                 user_date_input = tuple(map(pd.to_datetime, user_date_input))
                 start_date, end_date = user_date_input
                 df_selection_by_datepicker = df.loc[df['InvoiceDate'].between(start_date, end_date)]
-
+            else:
+                st.warning("Harap pilih dua tanggal yang valid.")
+            
+                
             hour = st.multiselect(
                 "Select the hour:",
                 options=df_selection_by_datepicker["hour"].sort_values().unique(),
@@ -145,19 +157,7 @@ if authentication_status:
             return description, df_selection_by_datepicker,df_selection_by_hour
         description, df_selection_by_datepicker, df_selection_by_hour = filterDashboard(df)
 
-        if df_selection_by_hour.empty is False:
-        # def get_data(hour = ''):
-        #     data = df_selection.copy()
-        #     data["hour"] = data["hour"].astype(str)
-        #     filtered = data.loc[
-        #         (data["hour"].str.contains(str(hour)))
-                
-        #     ]
-        #     return filtered if filtered.shape[0] else "No Result!"
-
-        #data = get_data(df_selection)
-
-        
+        if df_selection_by_hour.empty is False:       
             t1_start = process_time()
             def encode(x):
                 if x <= 0:
@@ -178,25 +178,12 @@ if authentication_status:
             @st.cache_data
             def load_te():
                 return TransactionEncoder
-            transactionencoder = load_te()
+            transactionEncoder = load_te()
 
             if type(df_selection_by_hour) != type(df_selection_by_hour):
                 st.error("Tidak ada data" )
             
             if type(df_selection_by_hour) == type(df_selection_by_hour):
-                # REDFLAG LAMA PARAH 48dtk vs 9dtk
-                # item_count = df.groupby(["InvoiceNo", "Description"])["Description"].count().reset_index(name = "Count")
-                # item_count_pivot = item_count.pivot_table(index='InvoiceNo', columns='Description', values='Count', aggfunc='sum').fillna(0)
-                # item_count_pivot = item_count_pivot.map(encode)
-                #     #pemanggilan fpgrowth
-                # support = 0.02
-                # frequent_items = model(item_count_pivot, min_support=support, use_colnames=True)
-                # metric = "lift"
-                # min_threshold = 1
-                # rules = associationRules(frequent_items, metric=metric, min_threshold=min_threshold)[["antecedents", "consequents", "support", "confidence", "lift"]]
-                # rules.sort_values('confidence', ascending=False, inplace=True)
-                #rules = rules.drop(224)
-                #rules = rules.drop(225)
                 
                 #membuat market basket transactions
                 dfgroup = df_selection_by_hour.groupby(['CustomerID','InvoiceDate'])['Description'].agg(lambda x: ','.join(x.dropna())).reset_index()
@@ -208,7 +195,7 @@ if authentication_status:
                     dataset.append(new_val)
 
             #Frequent itemsets generation
-            te = transactionencoder()
+            te = transactionEncoder()
             te_ary = te.fit(dataset).transform(dataset,sparse=True)
             df_new = pd.DataFrame.sparse.from_spmatrix(te_ary, columns=te.columns_)
             frequent_items = model(df_new, min_support=0.02, use_colnames=True)
@@ -224,7 +211,7 @@ if authentication_status:
                     return ", ".join(x)
             #st.cache_data(ttl=24*60*60, show_spinner="Mengambil data...")
             def return_item_df(item_antecedents):
-                data = rules[["antecedents", "consequents"]].copy()
+                data = rules[["antecedents", "consequents", "support", "confidence", "lift"]].copy()
                 
                 data["antecedents"] = data["antecedents"].apply(parse_list)
                 data["consequents"] = data["consequents"].apply(parse_list)
@@ -239,14 +226,29 @@ if authentication_status:
                 if return_item_df(description)[0] != description:
                     st.warning("Tidak ada data yang valid yang cocok dengan item_antecedents.")
                 else:
-                    st.markdown("Hasil Rekomendasi :" )
-                    st.success(f"Ketika pelanggan membeli **{description}**, maka membeli **{return_item_df(description)[1]}** secara bersamaan")
+                    st.markdown("Recommendation :" )
+                    st.success(f"When customer buy **{description}**, then buy **{return_item_df(description)[1]}** at the same time")
             elif type(df_selection_by_hour) != type(df_selection_by_hour):
                 st.error("Tidak ada data" )
             else:
                 st.error("Index diluar jangkauan")
 
+
+            t1_stop = process_time()
+            st.info(f"Waktu analisis {t1_stop-t1_start} detik")
+
+            antecedents = (f"{return_item_df(description)[0]}")
+            consequents = f"{return_item_df(description)[1]}"
+            support = f"{return_item_df(description)[2]:.3f}"
+            confidence = f"{return_item_df(description)[3]:.3f}"
+            lift = f"{return_item_df(description)[4]:.3f}"
+            #key = f"{get_all_history()[0]}"
             
+            submitted = st.button("Save Data", use_container_width=True)
+            if submitted:
+                db.insert_mba_history(antecedents, consequents, support, confidence, lift)
+                st.success("Data saved!")
+
             def showKPI():
                 total_sales = int((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).sum())
                 average_sale_by_transaction = round((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).mean(), 2)
@@ -261,102 +263,95 @@ if authentication_status:
                 print("Sales count :", total_sales)
             showKPI()
 
-            t1_stop = process_time()
-            st.info(f"Waktu analisis {t1_stop-t1_start} detik")
 
+            # Mengambil data history
+            history_data = get_all_history()
+
+            # Konversi list ke DataFrame
+            hd = pd.DataFrame(history_data, columns=["antecedents", "consequents", "support", "confidence", "lift", "key"])
+
+            def dataframe_with_selections(hd):
+                #hd_with_selections = hd.copy()
+                hd.insert(0, "Select", False)
+
+            # Get dataframe row-selections from user with st.data_editor
+                edited_hd = st.data_editor(
+                    hd,
+                    hide_index=True,
+                    column_config={"Select": st.column_config.CheckboxColumn(required=True)},
+                    disabled=["antecedents", "consequents", "support", "confidence", "lift", "key"],
+                )
+                tambah = st.button('Delete', key='Select', type="primary", use_container_width=True)
+                #keys = get_key()
+                if tambah:
+                    selected_keys = get_selected_keys(edited_hd)
+                # Filter the dataframe using the temporary column, then drop the column
+                    for key in selected_keys:
+                    # selected_rows = edited_hd[edited_hd.Select]
+                    #if not selected_rows.empty:
+                        db.delete_history(key)
+                        return selected_keys.drop(edited_hd.Select)
+                        st.success("Data deleted!")
+                    
+
+                # Menampilkan DataFrame dengan kolom "Delete"
+            #st.dataframe(hd)
+            st.header("Association Table")
+            def showTable():
+                dfgroup = df_selection_by_hour.groupby(['CustomerID','InvoiceDate'])['Description'].agg(lambda x: ','.join(x.dropna())).reset_index()
+                dfgroup.sort_values(by='InvoiceDate', ascending=True, inplace=True,ignore_index=True)
+
+                dataset = []
+                for i in range(len(dfgroup['Description'])):
+                    new_val = dfgroup['Description'].iloc[i].split(',')
+                    dataset.append(new_val)
+
+                te = transactionEncoder()
+                te_ary = te.fit(dataset).transform(dataset,sparse=True)
+                df_new = pd.DataFrame.sparse.from_spmatrix(te_ary, columns=te.columns_)
+                frequent_items = model(df_new, min_support=0.02, use_colnames=True)
+                rules = associationRules(frequent_items, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
+                
+                rules['antecedents'] = rules['antecedents'].apply(list)
+                rules['consequents'] = rules['consequents'].apply(list)
+                
+                # rules1 = rules1.drop(224)
+                # rules1 = rules1.drop(225)
+                # rules = rules1[(rules1['lift'] >= 1)&
+                # (rules1['confidence'] <= 1)]
+                # rules = rules[rules['antecedents'].apply(lambda x: len(x) > 0)]
+                #rules.sort_values('confidence', ascending=False, inplace=True)
+                
+                    # rules = association_rules(frequent_items_fp, metric="confidence", min_threshold=0.05)
+
+                    # rules = association_rules(frequent_items_fp, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
+                    # rules.sort_values('confidence', ascending=False, inplace=True)
+                return rules
+            st.dataframe(showTable(), use_container_width=True)
+            st.markdown("---")
+
+            st.header("Saved Data")
+            selection = dataframe_with_selections(hd)
+            # st.write("Your selection:")
+            # st.write(selection)
+        
         else:
             st.warning("Masukkan data lengkap")
+        st.write(get_all_history())
         
-        # @st.cache_data
-        # def showTable():
-        #     #dataasli = pd.read_csv("data_clean.csv", encoding='latin-1')
-        #     dataasli_group = df_selection_by_hour.groupby(['CustomerID','InvoiceDate'])['Description'].agg(lambda x: ','.join(x.dropna())).reset_index()
-        #     dataasli_group.sort_values(by='InvoiceDate', ascending=True, inplace=True,ignore_index=True)
-        #     #dataasli_group
-
-        #     dataset = []
-        #     for i in range(len(dataasli_group['Description'])):
-        #         new_val = dataasli_group['Description'].iloc[i].split(',')
-        #         dataset.append(new_val)
-
-        #     te = TransactionEncoder()
-        #     te_ary = te.fit(dataset).transform(dataset)
-        #     df_new = pd.DataFrame(te_ary, columns=te.columns_)
-
-        #     frequent_items_fp = fpgrowth(df_new, min_support=0.02, use_colnames=True)
-        #     #frequent_items_fp
-
-        #     rules1 = association_rules(frequent_items_fp, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
-            
-        #     rules1['antecedents'] = rules1['antecedents'].apply(list)
-        #     rules1['consequents'] = rules1['consequents'].apply(list)
-            
-        #     # rules1 = rules1.drop(224)
-        #     # rules1 = rules1.drop(225)
-        #     # rules = rules1[(rules1['lift'] >= 1)&
-        #     # (rules1['confidence'] <= 1)]
-        #     # rules = rules[rules['antecedents'].apply(lambda x: len(x) > 0)]
-        #     #rules.sort_values('confidence', ascending=False, inplace=True)
-            
-        #         # rules = association_rules(frequent_items_fp, metric="confidence", min_threshold=0.05)
-
-        #         # rules = association_rules(frequent_items_fp, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
-        #         # rules.sort_values('confidence', ascending=False, inplace=True)
-        #     return rules1
-        # st.dataframe(showTable(), use_container_width=True)
-        st.write("dataframe rules : ")
-        rules
-
-        # def filter_dataframe(df: pd.DataFrame, key_name: str) -> pd.DataFrame:
-        #     rules['antecedents'] = rules['antecedents'].apply(list)
-        #     rules['consequents'] = rules['consequents'].apply(list)
-        #     modify = st.checkbox("Add filters", key=f"{key_name}")
-        #     if not modify:
-        #         return df
-        #     df = df.copy()
-        #     for col in df.columns:
-        #         if is_object_dtype(df[col]):
-        #             try:
-        #                 df[col] = pd.to_datetime(df[col])
-        #             except Exception:
-        #                 pass
-        #         if is_datetime64_any_dtype(df[col]):
-        #             df[col] = df[col].dt.tz_localize(None)
-        #     modification_container = st.container()
-        #     with modification_container:
-        #         to_filter_columns = st.multiselect("Filter dataframe on", df.columns)
-        #         for column in to_filter_columns:
-        #             left, right = st.columns((1, 20))
-        #             # if is_categorical_dtype(df[column]) or df[column].nunique() < 10:
-        #             #     user_cat_input = right.multiselect(f"Values for {column}",df[column].unique(),default=list(df[column].unique()),)
-        #             #     df = df[df[column].isin(user_cat_input)]
-        #             if is_numeric_dtype(df[column]):
-        #                 _min = float(df[column].min())
-        #                 _max = float(df[column].max())
-        #                 step = (_max - _min) / 100
-        #                 user_num_input = right.slider(f"Values for {column}",min_value=_min,max_value=_max,value=(_min, _max),step=step,)
-        #                 df = df[df[column].between(*user_num_input)]
-        #             elif is_datetime64_any_dtype(df[column]):
-        #                 user_date_input = right.date_input(f"Values for {column}",value=(df[column].min(),df[column].max(),),)
-        #                 if len(user_date_input) == 2:
-        #                     user_date_input = tuple(map(pd.to_datetime, user_date_input))
-        #                     start_date, end_date = user_date_input
-        #                     df = df.loc[df[column].between(start_date, end_date)]
-        #             # else:
-        #             #     user_text_input = right.text_input(f"Substring or regex in {column}",)
-        #             #     if user_text_input:
-        #             #         df = df[df[column].astype(str).str.contains(user_text_input)]
-        #     return df   
-        # st.dataframe(filter_dataframe(rules, "mba"), use_container_width=True)
-        # st.write("tanggal maksimal : ", df['InvoiceDate'].max())
         
-        # st.write("tanggal minimal : ", df['InvoiceDate'].min())
-        # st.write("dataframe df_selection : ")
-        # df_selection
 
-        # st.write("dataframe df_selection_by_hour : ")
-        # if type(df_selection_by_hour) == type(df_selection_by_hour):
-        #     df_selection_by_hour
+
+        # --- HIDE STREAMLIT STYLE ---
+# hide_st_style = """
+#             <style>
+#             #MainMenu {visibility: hidden;}
+#             footer {visibility: hidden;}
+#             header {visibility: hidden;}
+#             </style>
+#             """
+# st.markdown(hide_st_style, unsafe_allow_html=True)
+
         
 
         
