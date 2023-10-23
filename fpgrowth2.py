@@ -57,7 +57,7 @@ if authentication_status:
     authenticator.logout("Logout", "sidebar")
     
     @st.cache_data(show_spinner="Mengambil data...")
-    preprocessing
+    #preprocessing
     load dataset csv
     def get_data_parque():
         df = pd.read_parquet("data_clean.parque", engine='auto')
