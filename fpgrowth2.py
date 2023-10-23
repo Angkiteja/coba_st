@@ -58,7 +58,7 @@ if authentication_status:
     
     @st.cache_data(show_spinner="Mengambil data...")
     #preprocessing
-    load dataset csv
+    #load dataset csv
     def get_data_parque():
         df = pd.read_parquet("data_clean.parque", engine='auto')
         df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
