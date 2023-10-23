@@ -270,7 +270,7 @@ if authentication_status:
             # Konversi list ke DataFrame
             hd = pd.DataFrame(history_data, columns=["antecedents", "consequents", "support", "confidence", "lift", "key"])
 
-            def dataframe_with_selections(hd, use_container_width=True):
+            def dataframe_with_selections(hd):
                 #hd_with_selections = hd.copy()
                 hd.insert(0, "Select", False)
 
