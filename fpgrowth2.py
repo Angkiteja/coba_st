@@ -158,7 +158,7 @@ if authentication_status:
         description, df_selection_by_datepicker, df_selection_by_hour = filterDashboard(df)
 
         if df_selection_by_hour.empty is False:       
-            t1_start = process_time()
+            # t1_start = process_time()
             def encode(x):
                 if x <= 0:
                     return 0
@@ -234,8 +234,8 @@ if authentication_status:
                 st.error("Index diluar jangkauan")
 
 
-            t1_stop = process_time()
-            st.info(f"Waktu analisis {t1_stop-t1_start} detik")
+            # t1_stop = process_time()
+            # st.info(f"Waktu analisis {t1_stop-t1_start} detik")
 
             antecedents = (f"{return_item_df(description)[0]}")
             consequents = f"{return_item_df(description)[1]}"
