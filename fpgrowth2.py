@@ -331,7 +331,7 @@ if authentication_status:
             st.markdown("---")
 
             st.header("Saved Data")
-            st.dataframe(dataframe_with_selections(hd), use_container_width=True)
+            selection = dataframe_with_selections(hd)
             # st.write("Your selection:")
             # st.write(selection)
         
@@ -342,15 +342,15 @@ if authentication_status:
         
 
 
-        # --- HIDE STREAMLIT STYLE ---
-# hide_st_style = """
-#             <style>
-#             #MainMenu {visibility: hidden;}
-#             footer {visibility: hidden;}
-#             header {visibility: hidden;}
-#             </style>
-#             """
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+        --- HIDE STREAMLIT STYLE ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
         
 
