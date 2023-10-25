@@ -283,15 +283,17 @@ if authentication_status:
                 )
                 tambah = st.button('Delete', key='Select', type="primary", use_container_width=True)
                 #keys = get_key()
-                if tambah:
-                    selected_keys = get_selected_keys(edited_hd)
-                # Filter the dataframe using the temporary column, then drop the column
-                    for key in selected_keys:
-                    # selected_rows = edited_hd[edited_hd.Select]
-                    #if not selected_rows.empty:
-                        db.delete_history(key)
-                        return selected_keys.drop(edited_hd.Select)
-                        st.success("Data deleted!")
+                if edited_hd[edited_hd.Select].empty is False:
+                    if tambah:
+                        selected_keys = get_selected_keys(edited_hd)
+                    # Filter the dataframe using the temporary column, then drop the column
+                        for key in selected_keys:
+                        # selected_rows = edited_hd[edited_hd.Select]
+                        #if not selected_rows.empty:
+                            db.delete_history(key)
+                            st.success("Data deleted!")
+                else:
+                    st.warning("Choose the data to delete")
                     
 
                 # Menampilkan DataFrame dengan kolom "Delete"
