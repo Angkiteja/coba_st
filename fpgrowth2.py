@@ -216,10 +216,13 @@ if authentication_status:
                 data["antecedents"] = data["antecedents"].apply(parse_list)
                 data["consequents"] = data["consequents"].apply(parse_list)
 
-                filtered_data = list(data.loc[data["antecedents"] == item_antecedents].iloc[0,:])              
-                # if len(filtered_data) < 0:
-                #     str.warning("Tidak ada data yang valid yang cocok dengan item_antecedents.")
-                return filtered_data
+                
+                try:
+                    return list(data.loc[data["antecedents"] == item_antecedents].iloc[0,:])
+                except IndexError as e:
+                    # Tangani kesalahan di sini
+                    print("Terjadi kesalahan: ", e)
+                    return None  # Atau tindakan lain yang sesuai
                     
                  
             if type(df_selection_by_hour) == type(df_selection_by_hour):
