@@ -231,112 +231,112 @@ if authentication_status:
                 else:
                     st.markdown("Recommendation :" )
                     st.success(f"When customer buy **{description}**, then buy **{return_item_df(description)[1]}** at the same time")
-            elif type(df_selection_by_hour) != type(df_selection_by_hour):
-                st.error("Tidak ada data" )
-            else:
-                st.error("Index diluar jangkauan")
+            # elif type(df_selection_by_hour) != type(df_selection_by_hour):
+            #     st.error("Tidak ada data" )
+            # else:
+            #     st.error("Index diluar jangkauan")
 
 
             # t1_stop = process_time()
             # st.info(f"Waktu analisis {t1_stop-t1_start} detik")
 
-            antecedents = (f"{return_item_df(description)[0]}")
-            consequents = f"{return_item_df(description)[1]}"
-            support = f"{return_item_df(description)[2]:.3f}"
-            confidence = f"{return_item_df(description)[3]:.3f}"
-            lift = f"{return_item_df(description)[4]:.3f}"
-            #key = f"{get_all_history()[0]}"
-            
-            submitted = st.button("Save Data", use_container_width=True)
-            if submitted:
-                db.insert_mba_history(antecedents, consequents, support, confidence, lift)
-                st.success("Data saved!")
-
-            def showKPI():
-                total_sales = int((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).sum())
-                average_sale_by_transaction = round((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).mean(), 2)
-                left_column, right_column = st.columns(2)
-                with left_column:
-                    st.subheader("Sales total:")
-                    st.subheader(f"US $ {total_sales:,}")
-                with right_column:
-                    st.subheader("Average sales by transaction:")
-                    st.subheader(f"US $ {average_sale_by_transaction}")
-                st.markdown("---")
-                print("Sales count :", total_sales)
-            showKPI()
-
-
-            # Mengambil data history
-            history_data = get_all_history()
-
-            # Konversi list ke DataFrame
-            hd = pd.DataFrame(history_data, columns=["antecedents", "consequents", "support", "confidence", "lift", "key"])
-
-            def dataframe_with_selections(hd):
-                #hd_with_selections = hd.copy()
-                hd.insert(0, "Select", False)
-
-            # Get dataframe row-selections from user with st.data_editor
-                edited_hd = st.data_editor(
-                    hd,
-                    hide_index=True,
-                    column_config={"Select": st.column_config.CheckboxColumn(required=True)},
-                    disabled=["antecedents", "consequents", "support", "confidence", "lift", "key"],
-                )
-                tambah = st.button('Delete', key='Select', type="primary", use_container_width=True)
-                #keys = get_key()
-                if edited_hd[edited_hd.Select].empty is False:
-                    if tambah:
-                        selected_keys = get_selected_keys(edited_hd)
-                    # Filter the dataframe using the temporary column, then drop the column
-                        for key in selected_keys:
-                        # selected_rows = edited_hd[edited_hd.Select]
-                        #if not selected_rows.empty:
-                            db.delete_history(key)
-                            st.success("Data deleted!")
-                else:
-                    st.warning("Choose the data to delete")
+                    antecedents = (f"{return_item_df(description)[0]}")
+                    consequents = f"{return_item_df(description)[1]}"
+                    support = f"{return_item_df(description)[2]:.3f}"
+                    confidence = f"{return_item_df(description)[3]:.3f}"
+                    lift = f"{return_item_df(description)[4]:.3f}"
+                    #key = f"{get_all_history()[0]}"
                     
-
-                # Menampilkan DataFrame dengan kolom "Delete"
-            #st.dataframe(hd)
-            st.header("Association Table")
-            def showTable():
-                dfgroup = df_selection_by_hour.groupby(['CustomerID','InvoiceDate'])['Description'].agg(lambda x: ','.join(x.dropna())).reset_index()
-                dfgroup.sort_values(by='InvoiceDate', ascending=True, inplace=True,ignore_index=True)
-
-                dataset = []
-                for i in range(len(dfgroup['Description'])):
-                    new_val = dfgroup['Description'].iloc[i].split(',')
-                    dataset.append(new_val)
-
-                te = transactionEncoder()
-                te_ary = te.fit(dataset).transform(dataset,sparse=True)
-                df_new = pd.DataFrame.sparse.from_spmatrix(te_ary, columns=te.columns_)
-                frequent_items = model(df_new, min_support=0.02, use_colnames=True)
-                rules = associationRules(frequent_items, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
-                
-                rules['antecedents'] = rules['antecedents'].apply(list)
-                rules['consequents'] = rules['consequents'].apply(list)
-                
-                # rules1 = rules1.drop(224)
-                # rules1 = rules1.drop(225)
-                # rules = rules1[(rules1['lift'] >= 1)&
-                # (rules1['confidence'] <= 1)]
-                # rules = rules[rules['antecedents'].apply(lambda x: len(x) > 0)]
-                #rules.sort_values('confidence', ascending=False, inplace=True)
-                
-                    # rules = association_rules(frequent_items_fp, metric="confidence", min_threshold=0.05)
-
-                    # rules = association_rules(frequent_items_fp, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
-                    # rules.sort_values('confidence', ascending=False, inplace=True)
-                return rules
-            st.dataframe(showTable(), use_container_width=True)
-            st.markdown("---")
-
-            st.header("Saved Data")
-            selection = dataframe_with_selections(hd)
+                    submitted = st.button("Save Data", use_container_width=True)
+                    if submitted:
+                        db.insert_mba_history(antecedents, consequents, support, confidence, lift)
+                        st.success("Data saved!")
+        
+                    def showKPI():
+                        total_sales = int((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).sum())
+                        average_sale_by_transaction = round((df_selection_by_hour["UnitPrice"]*df_selection_by_hour["Quantity"]).mean(), 2)
+                        left_column, right_column = st.columns(2)
+                        with left_column:
+                            st.subheader("Sales total:")
+                            st.subheader(f"US $ {total_sales:,}")
+                        with right_column:
+                            st.subheader("Average sales by transaction:")
+                            st.subheader(f"US $ {average_sale_by_transaction}")
+                        st.markdown("---")
+                        print("Sales count :", total_sales)
+                    showKPI()
+        
+        
+                    # Mengambil data history
+                    history_data = get_all_history()
+        
+                    # Konversi list ke DataFrame
+                    hd = pd.DataFrame(history_data, columns=["antecedents", "consequents", "support", "confidence", "lift", "key"])
+        
+                    def dataframe_with_selections(hd):
+                        #hd_with_selections = hd.copy()
+                        hd.insert(0, "Select", False)
+        
+                    # Get dataframe row-selections from user with st.data_editor
+                        edited_hd = st.data_editor(
+                            hd,
+                            hide_index=True,
+                            column_config={"Select": st.column_config.CheckboxColumn(required=True)},
+                            disabled=["antecedents", "consequents", "support", "confidence", "lift", "key"],
+                        )
+                        tambah = st.button('Delete', key='Select', type="primary", use_container_width=True)
+                        #keys = get_key()
+                        if edited_hd[edited_hd.Select].empty is False:
+                            if tambah:
+                                selected_keys = get_selected_keys(edited_hd)
+                            # Filter the dataframe using the temporary column, then drop the column
+                                for key in selected_keys:
+                                # selected_rows = edited_hd[edited_hd.Select]
+                                #if not selected_rows.empty:
+                                    db.delete_history(key)
+                                    st.success("Data deleted!")
+                        else:
+                            st.warning("Choose the data to delete")
+                            
+        
+                        # Menampilkan DataFrame dengan kolom "Delete"
+                    #st.dataframe(hd)
+                    st.header("Association Table")
+                    def showTable():
+                        dfgroup = df_selection_by_hour.groupby(['CustomerID','InvoiceDate'])['Description'].agg(lambda x: ','.join(x.dropna())).reset_index()
+                        dfgroup.sort_values(by='InvoiceDate', ascending=True, inplace=True,ignore_index=True)
+        
+                        dataset = []
+                        for i in range(len(dfgroup['Description'])):
+                            new_val = dfgroup['Description'].iloc[i].split(',')
+                            dataset.append(new_val)
+        
+                        te = transactionEncoder()
+                        te_ary = te.fit(dataset).transform(dataset,sparse=True)
+                        df_new = pd.DataFrame.sparse.from_spmatrix(te_ary, columns=te.columns_)
+                        frequent_items = model(df_new, min_support=0.02, use_colnames=True)
+                        rules = associationRules(frequent_items, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
+                        
+                        rules['antecedents'] = rules['antecedents'].apply(list)
+                        rules['consequents'] = rules['consequents'].apply(list)
+                        
+                        # rules1 = rules1.drop(224)
+                        # rules1 = rules1.drop(225)
+                        # rules = rules1[(rules1['lift'] >= 1)&
+                        # (rules1['confidence'] <= 1)]
+                        # rules = rules[rules['antecedents'].apply(lambda x: len(x) > 0)]
+                        #rules.sort_values('confidence', ascending=False, inplace=True)
+                        
+                            # rules = association_rules(frequent_items_fp, metric="confidence", min_threshold=0.05)
+        
+                            # rules = association_rules(frequent_items_fp, metric="lift", min_threshold=1)[["antecedents", "consequents", "support", "confidence", "lift"]]
+                            # rules.sort_values('confidence', ascending=False, inplace=True)
+                        return rules
+                    st.dataframe(showTable(), use_container_width=True)
+                    st.markdown("---")
+        
+                    st.header("Saved Data")
+                    selection = dataframe_with_selections(hd)
             # st.write("Your selection:")
             # st.write(selection)
         
