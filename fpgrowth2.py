@@ -226,7 +226,7 @@ if authentication_status:
                     
                  
             if type(df_selection_by_hour) == type(df_selection_by_hour):
-                if return_item_df(description)[0] != description:
+                if return_item_df(description) is None:
                     st.warning("Tidak ada data yang valid yang cocok dengan item_antecedents.")
                 else:
                     st.markdown("Recommendation :" )
