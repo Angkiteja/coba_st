@@ -55,10 +55,11 @@ if authentication_status:
     #dfsql = pd.DataFrame(sql_query, columns = ['InvoiceNo', 'StockCode', 'Description', 'Quantity', 'InvoiceDate', 'UnitPrice', 'CustomerID', 'Country'])
     #print(dfsql)
     authenticator.logout("Logout", "sidebar")
+    st.sidebar.header("Apply the filter here")
     
     @st.cache_data(show_spinner="Retrieving data...")
     #preprocessing
-    #load dataset csv
+    #load dataset parquet
     def get_data_parque():
         df = pd.read_parquet("data_clean.parque", engine='auto')
         df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'], format="%Y-%m-%d %H:%M:%S")
