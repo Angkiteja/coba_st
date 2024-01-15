@@ -201,7 +201,7 @@ if authentication_status:
             st.stop()
         df_new = pd.DataFrame.sparse.from_spmatrix(te_ary, columns=te.columns_)
         frequent_items = model(df_new, min_support=0.02, use_colnames=True)
-        rules = associationRules(frequent_items, metric="confidence", min_threshold=0.1)[["antecedents", "consequents", "support", "confidence", "lift"]]
+        rules = associationRules(frequent_items, metric="confidence", min_threshold=0.2)[["antecedents", "consequents", "support", "confidence", "lift"]]
         rules.sort_values('lift', ascending=False, inplace=True)
         
         #st.cache_data(ttl=24*60*60, show_spinner="Mengambil data...")
